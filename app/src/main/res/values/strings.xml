@@ -8,4 +8,5 @@
     <string name="manage_inventory">Gestionar Inventario</string>
     <string name="inventory">Inventory</string>
     <string name="imagen_de_inventario">Imagen de inventario</string>
+    <string name="imagen_de_huella">Fingerprint</string>
 </resources>
