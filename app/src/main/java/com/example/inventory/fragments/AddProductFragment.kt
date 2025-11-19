@@ -30,8 +30,8 @@ class AddProductFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        // --- Código producto (solo dígitos, max 4) ---
-        val tietCode = view.findViewById<TextInputEditText>(R.id.tiet_product_code)
+        // --- Filtros reutilizables ---
+        // Filtro: sólo dígitos (protege contra pegado de texto con letras)
         val onlyDigitsFilter = InputFilter { source, start, end, dest, dstart, dend ->
             val sb = StringBuilder()
             for (i in start until end) {
@@ -40,6 +40,9 @@ class AddProductFragment : Fragment() {
             }
             if (sb.length == end - start) null else sb.toString()
         }
+
+        // --- Código producto (solo dígitos, max 4) ---
+        val tietCode = view.findViewById<TextInputEditText>(R.id.tiet_product_code)
         val maxLenCode = InputFilter.LengthFilter(4)
         tietCode.filters = arrayOf(maxLenCode, onlyDigitsFilter)
 
@@ -61,8 +64,12 @@ class AddProductFragment : Fragment() {
         // --- Precio (solo dígitos, max 20) ---
         val tietPrice = view.findViewById<TextInputEditText>(R.id.tiet_product_price)
         val maxLenPrice = InputFilter.LengthFilter(20)
-        // Reuse onlyDigitsFilter to allow only digits (prevenir pegado de texto no numérico)
         tietPrice.filters = arrayOf(maxLenPrice, onlyDigitsFilter)
+
+        // --- Cantidad (solo dígitos, max 4) (CRITERIO 5) ---
+        val tietQuantity = view.findViewById<TextInputEditText>(R.id.tiet_product_quantity)
+        val maxLenQuantity = InputFilter.LengthFilter(4)
+        tietQuantity.filters = arrayOf(maxLenQuantity, onlyDigitsFilter)
 
         // --- Guardar ---
         val btnSave = view.findViewById<Button>(R.id.btn_save_product)
@@ -70,6 +77,7 @@ class AddProductFragment : Fragment() {
             val codeText = tietCode.text?.toString()?.trim() ?: ""
             val nameText = tietName.text?.toString()?.trim() ?: ""
             val priceText = tietPrice.text?.toString()?.trim() ?: ""
+            val quantityText = tietQuantity.text?.toString()?.trim() ?: ""
 
             // Validaciones simples
             if (codeText.isEmpty()) {
@@ -96,9 +104,17 @@ class AddProductFragment : Fragment() {
                 showToast("El precio debe tener máximo 20 dígitos")
                 return@setOnClickListener
             }
+            if (quantityText.isEmpty()) {
+                showToast("Ingresa la cantidad")
+                return@setOnClickListener
+            }
+            if (quantityText.length > 4) {
+                showToast("La cantidad debe tener máximo 4 dígitos")
+                return@setOnClickListener
+            }
 
             // TODO: integrar con tu ViewModel/Repo para guardar producto
-            showToast("Guardado: $codeText — $nameText — $priceText")
+            showToast("Guardado: $codeText — $nameText — $priceText — qty:$quantityText")
 
             // Cerrar fragment (si quieres)
             parentFragmentManager.popBackStack()
@@ -109,6 +125,7 @@ class AddProductFragment : Fragment() {
         Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
     }
 }
+
 
 
 
