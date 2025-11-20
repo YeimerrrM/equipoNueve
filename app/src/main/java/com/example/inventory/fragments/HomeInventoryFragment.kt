@@ -2,6 +2,7 @@ package com.example.inventory.fragments
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,13 +15,13 @@ import com.example.inventory.R
 import com.example.inventory.adapters.InventoryAdapter
 import com.example.inventory.sessions.SessionManager
 import com.example.inventory.ui.MainActivity
-import com.example.inventory.viewmodel.HomeInventoryViewModel
+import com.example.inventory.viewmodel.InventoryViewModelC
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class HomeInventoryFragment : Fragment() {
 
     private lateinit var sessionManager: SessionManager
-    private val viewModel: HomeInventoryViewModel by viewModels()
+    private val viewModel: InventoryViewModelC by viewModels()
     private lateinit var inventoryAdapter: InventoryAdapter
 
     override fun onCreateView(
@@ -38,9 +39,14 @@ class HomeInventoryFragment : Fragment() {
         setupLogoutButton(view)
         setupFabAdd(view)
 
-        viewModel.inventoryItems.observe(viewLifecycleOwner) {
-            inventoryAdapter.updateData(it)
+        viewModel.getListInventory()
+
+        viewModel.listInventory.observe(viewLifecycleOwner) { items ->
+            Log.d("DEBUG_FRAGMENT", "LiveData recibió: ${items.size} items")
+            Log.d("DEBUG_FRAGMENT", "Contenido: $items")
+            inventoryAdapter.updateData(items)
         }
+
     }
 
     private fun setupRecyclerView(view: View) {
