@@ -1,5 +1,6 @@
 package com.example.inventory.fragments
 
+import android.graphics.Typeface
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
@@ -41,16 +42,17 @@ class AddProductFragment : Fragment() {
         tietQuantity = view.findViewById(R.id.tiet_product_quantity)
         btnSave = view.findViewById(R.id.btn_save_product)
 
-        // back button
+        // back action
         ivBack.setOnClickListener { parentFragmentManager.popBackStack() }
 
-        // filters
+        // --- filtros reutilizables ---
         val onlyDigitsFilter = InputFilter { source, start, end, _, _, _ ->
             val sb = StringBuilder()
             for (i in start until end) {
-                if (source[i].isDigit()) sb.append(source[i])
+                val c = source[i]
+                if (c.isDigit()) sb.append(c)
             }
-            if (sb.length == (end - start)) null else sb.toString()
+            if (sb.length == end - start) null else sb.toString()
         }
 
         val allowedCharsFilter = InputFilter { source, start, end, _, _, _ ->
@@ -61,15 +63,16 @@ class AddProductFragment : Fragment() {
                     sb.append(c)
                 }
             }
-            if (sb.length == (end - start)) null else sb.toString()
+            if (sb.length == end - start) null else sb.toString()
         }
 
+        // apply input filters (length + content)
         tietCode.filters = arrayOf(InputFilter.LengthFilter(4), onlyDigitsFilter)
         tietName.filters = arrayOf(InputFilter.LengthFilter(40), allowedCharsFilter)
         tietPrice.filters = arrayOf(InputFilter.LengthFilter(20), onlyDigitsFilter)
         tietQuantity.filters = arrayOf(InputFilter.LengthFilter(4), onlyDigitsFilter)
 
-        // watcher for button update
+        // TextWatcher para actualizar estado del botón
         val tw = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun afterTextChanged(s: Editable?) {}
@@ -83,8 +86,10 @@ class AddProductFragment : Fragment() {
         tietPrice.addTextChangedListener(tw)
         tietQuantity.addTextChangedListener(tw)
 
+        // estado inicial
         updateSaveButtonState()
 
+        // acción Guardar
         btnSave.setOnClickListener {
             val code = tietCode.text?.toString()?.trim()
             val name = tietName.text?.toString()?.trim()
@@ -96,11 +101,25 @@ class AddProductFragment : Fragment() {
                 return@setOnClickListener
             }
 
+            // Validaciones finales
+            if (code.length > 4) { showToast("Código: máximo 4 dígitos"); return@setOnClickListener }
+            if (name.length > 40) { showToast("Nombre: máximo 40 caracteres"); return@setOnClickListener }
+            if (price.length > 20) { showToast("Precio: máximo 20 dígitos"); return@setOnClickListener }
+            if (qty.length > 4) { showToast("Cantidad: máximo 4 dígitos"); return@setOnClickListener }
+
+            // TODO: integrar con ViewModel/Repo para persistir el producto
             showToast("Guardado: $code - $name - $price - qty:$qty")
+
             parentFragmentManager.popBackStack()
         }
     }
 
+    /**
+     * Actualiza el estado del botón Guardar:
+     * - Si todos los campos tienen texto: habilita el botón, cambia fondo a naranja,
+     *   establece texto en blanco y en bold.
+     * - Si falta algún campo: deshabilita el botón, fondo gris y texto en normal.
+     */
     private fun updateSaveButtonState() {
         val code = tietCode.text?.toString()?.trim()
         val name = tietName.text?.toString()?.trim()
@@ -113,15 +132,23 @@ class AddProductFragment : Fragment() {
                 && !qty.isNullOrEmpty()
 
         if (allFilled) {
+            // habilitado: fondo naranja sólido + texto BLANCO BOLD
             btnSave.isEnabled = true
-            btnSave.alpha = 1f
             btnSave.isClickable = true
+            btnSave.alpha = 1f
             btnSave.background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_button_orange)
+            // asegurar color blanco y bold
+            btnSave.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+            btnSave.setTypeface(null, Typeface.BOLD)
         } else {
+            // deshabilitado: fondo gris + texto normal
             btnSave.isEnabled = false
-            btnSave.alpha = 0.4f
             btnSave.isClickable = false
+            btnSave.alpha = 0.4f
             btnSave.background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_button_disabled)
+            // mantener texto visible pero sin negrita
+            btnSave.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+            btnSave.setTypeface(null, Typeface.NORMAL)
         }
     }
 
