@@ -1,4 +1,52 @@
 package com.example.inventory.fragments
 
-class ItemDetailsFragment {
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import com.example.inventory.R
+import com.example.inventory.model.Inventory
+import com.example.inventory.viewmodel.InventoryViewModelC
+
+@Suppress("DEPRECATION")
+class ItemDetailsFragment : Fragment() {
+
+    private val viewModel: InventoryViewModelC by viewModels()
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_item_details, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val inventoryItem = arguments?.getSerializable("inventory_item") as? Inventory
+
+        inventoryItem?.let { item ->
+            view.findViewById<TextView>(R.id.tvItem).text = item.name
+            view.findViewById<TextView>(R.id.tvValorUnidad).text = "$${item.price}"
+            view.findViewById<TextView>(R.id.tvCantidad).text = "Quantity: ${item.quantity}"
+            view.findViewById<TextView>(R.id.tvSumaTotal).text = "Total: $${item.quantity * item.price} "
+
+            view.findViewById<Button>(R.id.btnDelete).setOnClickListener {
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Eliminar Producto")
+                    .setMessage("Estás seguro de eliminar el producto: ${item.name}?")
+                    .setPositiveButton("Sí") { _, _ ->
+                        viewModel.deleteInventory(item)
+                        parentFragmentManager.popBackStack()
+                    }
+                    .setNegativeButton("No", null)
+                    .show()
+            }
+        }
+    }
 }

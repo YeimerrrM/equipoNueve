@@ -8,7 +8,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.inventory.R
 import com.example.inventory.model.Inventory
 
-class InventoryAdapter(private var items: List<Inventory>) : RecyclerView.Adapter<InventoryAdapter.ViewHolder>() {
+class InventoryAdapter(
+    private var items: List<Inventory>,
+    private val onItemClick: (Inventory) -> Unit
+) : RecyclerView.Adapter<InventoryAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_inventory, parent, false)
@@ -18,6 +21,9 @@ class InventoryAdapter(private var items: List<Inventory>) : RecyclerView.Adapte
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
         holder.bind(item)
+        holder.itemView.setOnClickListener {
+            onItemClick(item)
+        }
     }
 
     override fun getItemCount(): Int = items.size
