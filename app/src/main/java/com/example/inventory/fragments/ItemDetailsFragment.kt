@@ -16,6 +16,8 @@ import com.example.inventory.model.Inventory
 import com.example.inventory.viewmodel.InventoryViewModelC
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 
 @Suppress("DEPRECATION")
 class ItemDetailsFragment : Fragment() {
@@ -46,6 +48,18 @@ class ItemDetailsFragment : Fragment() {
         }
 
         inventoryItem?.let { item ->
+
+            val symbols = DecimalFormatSymbols().apply {
+                groupingSeparator = '.'
+                decimalSeparator = ','
+            }
+
+            val formatter = DecimalFormat("#,##0.00", symbols)
+
+            val formattedPrice = "$ " + formatter.format(item.price)
+            val totalValue = item.quantity * item.price
+            val formattedTotal = "$" + formatter.format(totalValue)
+
             view.findViewById<TextView>(R.id.tvItem).text = item.name
             view.findViewById<TextView>(R.id.tvValorUnidad).text = "$${item.price}"
             view.findViewById<TextView>(R.id.tvCantidad).text = "${item.quantity}"
